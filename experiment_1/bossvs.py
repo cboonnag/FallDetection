@@ -131,7 +131,7 @@ if __name__ == "__main__":
     listf1 = [ ]
 
     for test_subj in SA_id: # leave-one-subject-out
-        f = open( "ResultsBOSSVS EXP1.txt",'a')
+        f = open( "bossvs_results_exp1.txt",'a')
         print('\n===================================')
         print('test subject:', test_subj)
         f.write('TEST SUBJECT :{}\n'.format(str(test_subj))) 
@@ -285,7 +285,7 @@ if __name__ == "__main__":
         listsp.append( sp )
         f.close()
 
-    f = open( "ResultsBOSSVS EXP1.txt",'a')
+    f = open( "bossvs_results_exp1.txt",'a')
 
     f.write("OVERALL \n")
 
