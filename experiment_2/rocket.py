@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import glob
-from tslearn.preprocessing import TimeSeriesResampler
 from scipy import signal
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from sklearn.linear_model import LogisticRegression
@@ -16,6 +15,8 @@ from sklearn.metrics import f1_score
 from pyts.multivariate.transformation import MultivariateTransformer
 from pyts.transformation import ROCKET
 import os
+from general import DataPrep
+
 
 main_path = 'SisFall_dataset/'
 
