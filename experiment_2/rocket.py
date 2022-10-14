@@ -15,8 +15,6 @@ from sklearn.metrics import f1_score
 from pyts.multivariate.transformation import MultivariateTransformer
 from pyts.transformation import ROCKET
 import os
-from general import DataPrep
-
 
 main_path = 'SisFall_dataset/'
 

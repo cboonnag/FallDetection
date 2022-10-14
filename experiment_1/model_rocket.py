@@ -16,93 +16,13 @@ from sklearn.metrics import f1_score
 from pyts.multivariate.transformation import MultivariateTransformer
 from pyts.transformation import ROCKET
 
-main_path = 'SisFall_dataset/'
-samp_rate = 200
-n_timestamps = 36000
-sensor = ["XAD", "YAD", "ZAD", "XR", "YR", "ZR", "XM", "YM", "ZM"]
-chosen = ["XAD", "ZAD", "XR" , "YR", "ZR"]
-#train model
-def reduce_mem_usage(df):
-    """ iterate through all the columns of a dataframe and modify the data type
-        to reduce memory usage.        
-    """
-    start_mem = df.memory_usage().sum() / 1024**2
-    print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
+
+
+
+from utilities.preparation import DataPrep
+
+class RocketPrep(DataPrep):
     
-    for col in df.columns:
-        col_type = df[col].dtype
-
-        if col_type != object:
-            c_min = df[col].min()
-            c_max = df[col].max()
-            if str(col_type)[:3] == 'int':
-                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                    df[col] = df[col].astype(np.int8)
-                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                    df[col] = df[col].astype(np.int16)
-                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                    df[col] = df[col].astype(np.int32)
-                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                    df[col] = df[col].astype(np.int64)  
-            else:
-                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
-                    df[col] = df[col].astype(np.float16)
-                elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
-                    df[col] = df[col].astype(np.float32)
-                else:
-                    df[col] = df[col].astype(np.float64)
-        else:
-            df[col] = df[col].astype('category')
-
-    end_mem = df.memory_usage().sum() / 1024**2
-    print('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
-    print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
-
-    return df
-
-def get_data(path):
-    """
-    read and processing data
-    return data (ndarray) shape = (n_features, n_timestamps)
-    """
-    df = pd.read_csv(path, delimiter=',', header=None)
-    df = reduce_mem_usage(df)
-    
-    df.columns = sensor
-    df['ZM'] = df['ZM'].replace({';': ''}, regex=True)
-    data = df[chosen].values.T # shape = (n_features, n_timestamps)
-    si = (data.shape[-1] // 200) * samp_rate
-    data = signal.resample(x=data, num=si, axis=1)
-    data = np.pad(data, ((0, 0), (0, n_timestamps-data.shape[-1])), 'constant') # pad zero
-    data = medfilt(data, kernel_size=(1,3))
-    # data = medfilt(data, kernel_size=1)
-    return data # shape = (n_features, n_timestamps)
-
-def get_meta(path):
-    """
-    get list of metadata from each file
-    """
-    f = path.split('/')[-1].replace('.txt', '') # D01_SA01_R01
-    activity, subject, record = f.split('_') # [D01, SA01, R01]
-    label = activity[0] # A or D
-    return [label, activity, subject, record]
-
-
-def load_dataset():
-    path_list = glob.glob(main_path+'*/*.txt')
-    X, y, meta = [], [], []
-    
-    for path in tqdm(path_list):
-        data_ = get_data(path)
-        meta_ = get_meta(path)
-        
-        X.append(data_)
-        y.append(meta_[0])
-        meta.append(meta_)
-        
-    return np.array(X), np.array(y), np.array(meta)
-
-
 
 if __name__ == "__main__":
 
@@ -173,7 +93,8 @@ if __name__ == "__main__":
             
             print("hello")
             print(train_idxs)
-            print( len( train_idxs) ) 
+            print( len( train_idxs) )
+            
             print( val_idxs )
             
             rocket = MultivariateTransformer(ROCKET(n_kernels=n_k))

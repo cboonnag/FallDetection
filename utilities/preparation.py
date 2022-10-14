@@ -8,15 +8,27 @@ from pathlib import PureWindowsPath
 
 class DataPrep():
     MAIN_PATH = 'SisFall_dataset/' 
-    main_path = 'SisFall_dataset/'
-    SAMP_RATE = 200
     N_TIMESTAMPS = 36000
     SENSOR_LIST = ["XAD", "YAD", "ZAD", "XR", "YR", "ZR", "XM", "YM", "ZM"]
     CHOSEN_SENSOR = ["XAD", "ZAD", "XR" ,"YR", "ZR"]
+    DISCARDED_DICT = {
+        "none": ["XAD", "ZAD", "XR" , "YR", "ZR"],
+        "x-accel": ["ZAD", "XR" , "YR", "ZR"],
+        "z-accel": ["XAD", "XR" , "YR", "ZR"],
+        "x-gyro": ["XAD", "ZAD" , "YR", "ZR"],
+        "y-gyro": ["XAD", "ZAD", "XR" , "ZR"],
+        "z-gyro": ["XAD", "ZAD", "XR" , "YR"],
+        "all-gyro": ["XAD", "ZAD"]
+        }
 
     dataset_mem = 0
     reduced_mem = 0 
-    
+
+    def __init__(self,sampling_rate = 200, discarded_channel = "none"):
+        self.sampling_rate = sampling_rate 
+        self.discarded_channel = discarded_channel 
+        self.selected_channels = self.DISCARDED_DICT[discarded_channel]
+
     def __reduce_mem_usage__(self, df): 
         """ iterate through all the columns of a dataframe and modify the data type
         to reduce memory usage.        
@@ -67,8 +79,8 @@ class DataPrep():
 
         df.columns = self.SENSOR_LIST
         df['ZM'] = df['ZM'].replace({';': ''}, regex=True)
-        data = df[self.CHOSEN_SENSOR].values.T # shape = (n_features, n_timestamps)
-        si = (data.shape[-1] // 200) * self.SAMP_RATE
+        data = df[self.selected_channels].values.T # shape = (n_features, n_timestamps)
+        si = (data.shape[-1] // 200) * self.sampling_rate
         data = resample(x=data, num=si, axis=1)
         data = np.pad(data, ((0, 0), (0, self.N_TIMESTAMPS - data.shape[-1])), 'constant') # pad zero
         data = medfilt(data, kernel_size=(1,3))
@@ -88,6 +100,10 @@ class DataPrep():
     def load_dataset(self):
         path_list = glob.glob(self.MAIN_PATH+'*/*.txt')
         X, y, meta = [], [], []
+        print("Load Dataset")
+        print("Sampling rate: {}\nChannel list: {}\n".format(
+            self.sampling_rate,
+            self.selected_channels))
 
         #tqdm -  show a progress meter 
         print("Reducing memory usage")
@@ -103,7 +119,8 @@ class DataPrep():
         print('Decreased by {:.1f}%'.format(100 * (self.dataset_mem - self.reduced_mem) / self.dataset_mem))
 
         return np.array(X), np.array(y), np.array(meta)
-
+    
 if __name__ == "__main__":
-    Preprocess = DataPrep()
+    Preprocess = DataPrep(sampling_rate= 120, discarded_channel="x-gyro")
     X, y, meta = Preprocess.load_dataset() 
+

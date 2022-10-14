@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import glob
-from tslearn.preprocessing import TimeSeriesResampler
 from scipy import signal
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
 from pyts.multivariate.transformation import WEASELMUSE

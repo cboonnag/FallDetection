@@ -83,7 +83,7 @@ def get_meta(path):
     """
     get list of metadata from each file
     """
-    f = path.split('\\')[-1].replace('.txt', '') # D01_SA01_R01
+    f = path.split('/')[-1].replace('.txt', '') # D01_SA01_R01
     print(f)
     activity, subject, record = f.split('_') # [D01, SA01, R01]
     label = activity[0] # A or D
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     listf1 = [ ]
 
     for test_subj in SA_id: # leave-one-subject-out
-        f = open( "bossvs_results_exp1.txt",'a')
+        f = open( "experiment_1/results/bossvs_results_exp1.txt",'a')
         print('\n===================================')
         print('test subject:', test_subj)
         f.write('TEST SUBJECT :{}\n'.format(str(test_subj))) 
